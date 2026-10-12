@@ -1139,7 +1139,8 @@
     "focusFromOlder": "Started from this job's older instructions.",
     "addFocus": "Add a focus area",
     "checking": "Checking…",
-    "saveAnyway": "Save anyway"
+    "saveAnyway": "Save anyway",
+    "cannotCheckEmail": "{{name}} cannot check email"
   },
   "webhooksSection": {
     "summaryNone": "none",

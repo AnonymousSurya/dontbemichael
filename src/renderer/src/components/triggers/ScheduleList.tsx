@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { PixelButton } from '../PixelButton';
 import { useStore } from '@/store/store';
+import { useHarnessConfig } from '@/hooks/useHarnessConfig';
 import { useResolvedGodName } from '@/hooks/useResolvedGodName';
 import { isComposingKey } from '@shared/imeGuard';
 import {
@@ -222,9 +223,11 @@ interface RowProps {
   ownerName: string;
   /** For the focus area check on save; absent on read only rows. */
   focusOwner?: FocusOwner;
+  /** Whether the agent that owns this schedule has email off. */
+  emailOff?: boolean;
 }
 
-function ScheduleRow({ mission, nameOf, readOnly, ownerName, focusOwner }: RowProps) {
+function ScheduleRow({ mission, nameOf, readOnly, ownerName, focusOwner, emailOff }: RowProps) {
   const { t, i18n } = useTranslation();
   const rtl = useRtl();
   const godName = useResolvedGodName();
@@ -340,6 +343,9 @@ function ScheduleRow({ mission, nameOf, readOnly, ownerName, focusOwner }: RowPr
         {/* An older job without a focus area keeps running as before (FA4). */}
         {!readOnly && !heartbeat && (mission.kind ?? 'dispatch') === 'dispatch' && !mission.focus && (
           <span data-add-focus style={{ display: 'block', fontSize: 13, lineHeight: '18px', fontWeight: 600, color: 'var(--cth-amber-text)' }}>{t('schedulesSection.addFocus')}</span>
+        )}
+        {emailOff && !heartbeat && (
+          <span data-email-warning style={{ display: 'block', fontSize: 13, lineHeight: '18px', color: 'var(--cth-coral)' }}>{t('schedulesSection.cannotCheckEmail', { name: ownerName })}</span>
         )}
       </span>
     </>
@@ -534,8 +540,10 @@ export function AgentSchedules({ agentId, agentName }: { agentId: string; agentN
   const godId = useGodId();
   const nameOf = useNameOf();
   const agents = useStore((s) => s.agents);
+  const config = useHarnessConfig();
   const mine = useMemo(() => missionsFor(missions, agentId, godId), [missions, agentId, godId]);
   const isGod = agentId === godId;
+  const emailOff = config ? !(config.agentCapabilities?.[agentId]?.email?.enabled ?? (isGod ? config.agentCapabilities?.[GOD_ALIAS]?.email?.enabled : false)) : false;
   // Michael's schedules keep the 'god' alias the router understands.
   const to = isGod ? GOD_ALIAS : agentId;
 
@@ -569,6 +577,7 @@ export function AgentSchedules({ agentId, agentName }: { agentId: string; agentN
             nameOf={nameOf}
             ownerName={agentName}
             focusOwner={focusOwner}
+            emailOff={emailOff}
           />
         ))}
       </div>
@@ -584,6 +593,7 @@ export function OfficeSchedules() {
   const godId = useGodId();
   const nameOf = useNameOf();
   const agents = useStore((s) => s.agents);
+  const config = useHarnessConfig();
   const [closed, setClosed] = useState<Record<string, boolean>>({});
   useEffect(() => {
     window.cth.hiveRegistry()
@@ -609,6 +619,9 @@ export function OfficeSchedules() {
       {owners.map((owner) => {
         const name = nameOf(owner);
         const isClosed = closed[owner];
+        const ownerEmailOff = config
+          ? !(config.agentCapabilities?.[owner]?.email?.enabled ?? (owner === godId ? config.agentCapabilities?.[GOD_ALIAS]?.email?.enabled : false))
+          : false;
         const rows = others
           .filter((m) => ownerOf(m, godId) === owner)
           .sort((a, b) => (nextRunAt(a, Date.now()) ?? Infinity) - (nextRunAt(b, Date.now()) ?? Infinity));
@@ -626,6 +639,7 @@ export function OfficeSchedules() {
                   nameOf={nameOf}
                   ownerName={name}
                   readOnly
+                  emailOff={ownerEmailOff}
                 />
               ))}
             </div>

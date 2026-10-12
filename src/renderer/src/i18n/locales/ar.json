@@ -1139,7 +1139,8 @@
     "focusFromOlder": "بدأ من التعليمات القديمة لهذه المهمة.",
     "addFocus": "أضف محور تركيز",
     "checking": "جارٍ التحقق…",
-    "saveAnyway": "احفظ على أي حال"
+    "saveAnyway": "احفظ على أي حال",
+    "cannotCheckEmail": "لا يمكن لـ {{name}} متابعة البريد"
   },
   "webhooksSection": {
     "summaryNone": "لا شيء",

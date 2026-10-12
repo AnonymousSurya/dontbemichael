@@ -1139,7 +1139,8 @@
     "focusFromOlder": "以此任务的旧说明为起点。",
     "addFocus": "添加重点",
     "checking": "正在检查…",
-    "saveAnyway": "仍然保存"
+    "saveAnyway": "仍然保存",
+    "cannotCheckEmail": "{{name}}无法查看邮件"
   },
   "webhooksSection": {
     "summaryNone": "无",
